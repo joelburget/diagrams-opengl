@@ -15,6 +15,22 @@ build-type:          Simple
 cabal-version:       >=1.8
 
 library
-  exposed-modules: Diagrams.Backend.OpenGL.Internal
+  exposed-modules:
+    Diagrams.Backend.OpenGL.Internal,
+    Diagrams.Backend.OpenGL.CmdLine
   -- other-modules:
-  build-depends:       base ==4.5.*, bytestring ==0.9.*, OpenGL ==2.5.*, cairo ==0.12.*, pango ==0.12.*, array ==0.4.*, GLUT ==2.3.*, mtl ==2.1.*, diagrams-lib ==0.5.*, uniqueid == 0.1.*, containers >= 0.4
+  build-depends:
+    base == 4.5.*,
+    bytestring == 0.9.*,
+    OpenGL == 2.5.*,
+    cairo == 0.12.*,
+    pango == 0.12.*,
+    array == 0.4.*,
+    GLUT == 2.3.*,
+    GLFW == 0.5.*,
+    GLFW-task == 0.2.*,
+    mtl == 2.1.*,
+    diagrams-lib == 0.5.*,
+    uniqueid == 0.1.*,
+    containers >= 0.4,
+    monad-task == 0.1.*

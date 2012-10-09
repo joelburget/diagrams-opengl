@@ -46,13 +46,19 @@ type Height = Int
 
 -- | Model that bundles a VBO and textures together into a drawable object.
 data Model = Model
-    { mode      :: PrimitiveMode                 -- ^Mode of the vertices, e.g. TriangleFan
-    , count     :: NumArrayIndices               -- ^Vertex count
-    , vbo       :: BufferObject                  -- ^VBO with the vertices and texcoords
-    , textures  :: [TextureObject]               -- ^List of textures to bind with 'Texture.useTexture'
-    , verts     :: VertexArrayDescriptor GLfloat -- ^Vertex array descriptor for the model vertices
-    , texCoords :: VertexArrayDescriptor GLfloat -- ^Vertex array descriptor for the model texture coordinates
-    }
+    { mode      :: PrimitiveMode
+    -- ^Mode of the vertices, e.g. TriangleFan
+    , count     :: NumArrayIndices
+    -- ^Vertex count
+    , vbo       :: BufferObject
+    -- ^VBO with the vertices and texcoords
+    , textures  :: [TextureObject]
+    -- ^List of textures to bind with 'Texture.useTexture'
+    , verts     :: VertexArrayDescriptor GLfloat
+    -- ^Vertex array descriptor for the model vertices
+    , texCoords :: VertexArrayDescriptor GLfloat
+    -- ^Vertex array descriptor for the model texture coordinates
+    } deriving Show
 
 -- | Fills screen with the current color.
 --
