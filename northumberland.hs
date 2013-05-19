@@ -8,12 +8,12 @@ import Graphics.Rendering.OpenGL (($=))
 import Graphics.Rendering.Cairo hiding (identityMatrix)
 import Prelude hiding (lines)
 import Graphics.UI.GLFW.Task
-import Matrix
-import Texture
-import Models
+import Diagrams.Backend.OpenGL.Matrix
+import Diagrams.Backend.OpenGL.Texture
+import Diagrams.Backend.OpenGL.Models
 import Graphics.Rendering.Pango
 
-buttonPress, buttonRelease :: Event -> Maybe GLFW.MouseButton 
+buttonPress, buttonRelease :: Event -> Maybe GLFW.MouseButton
 buttonPress   (MouseButtonEvent b GLFW.Press)   = Just b
 buttonPress   _                                 = Nothing
 buttonRelease (MouseButtonEvent b GLFW.Release) = Just b
@@ -26,12 +26,12 @@ repeatUntil f m = loop
 data RetainedModel = RetainedModel
     { model    :: Model --GL.TextureObject
     , modified :: Bool
-    }
+    } deriving Show
 
 data World = World
     { dirty  :: Bool
     , models :: [RetainedModel]
-    }
+    } deriving Show
 
 type M a = TaskT Event (StateT World IO) a
 
@@ -63,11 +63,15 @@ cairoTask initial = (`evalStateT` initial) . runTask $ do
   putDirty True
   forever $ do
     waitForEvents
+    liftIO $ putStrLn "dirty?"
     d <- getDirty
     s <- getSurfaces
-    liftIO $ putStrLn "dirty?"
     -- when d $ getLines >>= liftIO . drawLines >> liftIO GLFW.swapBuffers
-    when d $ liftIO (putStrLn "here" >> drawSurfaces s >> GLFW.swapBuffers)
+    when d $ liftIO $ do
+        putStrLn "here"
+        drawSurfaces s
+        print s
+        GLFW.swapBuffers
     putDirty False
     yield              -- give other tasks chance to run
   {-
@@ -75,7 +79,7 @@ cairoTask initial = (`evalStateT` initial) . runTask $ do
     interaction = do
       watch buttonPress
       (GL.Position x y) <- liftIO $ GL.get GLFW.mousePos
-      modifyLines (((x, y):) . ((x, y):)) 
+      modifyLines (((x, y):) . ((x, y):))
       repeatUntil buttonRelease $ do
         (GL.Position x' y') <- liftIO $ GL.get GLFW.mousePos
         modifyLines (((x', y'):) . tail)
@@ -95,10 +99,10 @@ main = do
     -- set the color to clear background
     GL.clearColor $= GL.Color4 0 0 0 0
 
-    initial <- sequence [smiley, boxes, helloWorld]
+    initial <- sequence [smiley] --, boxes, helloWorld]
     --initial <- sequence [boxes, smiley]
-   
-    forever $ cairoTask $ World True initial
+
+    cairoTask $ World True initial
 
 w, h :: Int
 w = 400
@@ -148,6 +152,7 @@ smiley = cairoModel 0 0 w h $ do
     setSourceRGBA 0 0 1 0.4
     fill
 
+{-
 helloWorld :: IO RetainedModel
 helloWorld = textModel 200 200 AlignCenter "Hello World!"
 
@@ -159,6 +164,7 @@ textModel x y layout = createTextTexture layout >=> uncurry3 (texModel x y)
 
 pangoLayoutModel :: Int -> Int -> PangoLayout -> IO RetainedModel
 pangoLayoutModel x y = createPangoLayoutTexture >=> uncurry3 (texModel x y)
+-}
 
 texModel :: Int -> Int -> Int -> Int -> GL.TextureObject -> IO RetainedModel
 texModel x y w h tex = do

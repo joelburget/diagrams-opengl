@@ -8,7 +8,6 @@ module Diagrams.Backend.OpenGL.VBO (
 import Foreign.Storable
 import Data.Array.Storable
 import Graphics.Rendering.OpenGL
-import Graphics.UI.GLUT (reportErrors)
 
 -- | Creates a 'BufferObject' for the given list of 'Storable' elements.
 --
@@ -21,7 +20,6 @@ createVBO elems = do
     withStorableArray arr (\ptr ->                  -- Data.Array.Storable
         bufferData ArrayBuffer $= (ptrsize elems, ptr, StaticDraw))
     bindBuffer ArrayBuffer $= Nothing
-    reportErrors
     return vbo
     where ptrsize [] = toEnum 0
           ptrsize (x:_) = toEnum $ length elems * (sizeOf x)

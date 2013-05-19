@@ -17,20 +17,80 @@ cabal-version:       >=1.8
 library
   exposed-modules:
     Diagrams.Backend.OpenGL.Internal,
-    Diagrams.Backend.OpenGL.CmdLine
+    Diagrams.Backend.OpenGL.CmdLine,
+    Diagrams.Backend.OpenGL.Matrix,
+    Diagrams.Backend.OpenGL.Texture,
+    Diagrams.Backend.OpenGL.Models
   -- other-modules:
   build-depends:
-    base == 4.5.*,
-    bytestring == 0.9.*,
-    OpenGL == 2.5.*,
-    cairo == 0.12.*,
-    pango == 0.12.*,
-    array == 0.4.*,
-    GLUT == 2.3.*,
-    GLFW == 0.5.*,
-    GLFW-task == 0.2.*,
-    mtl == 2.1.*,
-    diagrams-lib == 0.5.*,
-    uniqueid == 0.1.*,
+    base >= 4.5,
+    bytestring >= 0.10,
+    OpenGL >= 2.8,
+    cairo >= 0.12,
+    pango >= 0.12,
+    array >= 0.4,
+    GLFW >= 0.5,
+    mtl >= 2.1,
+    diagrams-lib >= 0.6,
+    diagrams-cairo >= 0.6,
+    uniqueid >= 0.1,
     containers >= 0.4,
-    monad-task == 0.1.*
+    monoid-extras >= 0.2
+
+executable fitzroy
+  main-is:
+    fitzroy.hs
+  build-depends:
+    base >= 4.5,
+    pango >= 0.12,
+    cairo >= 0.12,
+    OpenGL >= 2.8,
+    bytestring >= 0.10,
+    array >= 0.4,
+    monoid-extras >= 0.2,
+    diagrams-lib >= 0.6,
+    diagrams-cairo >= 0.6,
+    containers >= 0.5,
+    uniqueid >= 0.1,
+    mtl >= 2.1,
+    GLFW >= 0.5
+  ghc-options:
+    -prof -fprof-auto -rtsopts
+
+-- executable northumberland
+--   main-is:
+--     northumberland.hs
+--   build-depends:
+--     base >= 4.5,
+--     pango >= 0.12,
+--     cairo >= 0.12,
+--     OpenGL >= 2.8,
+--     bytestring >= 0.10,
+--     GLUT >= 2.4,
+--     array >= 0.4,
+--     monoid-extras >= 0.2,
+--     diagrams-lib >= 0.6,
+--     diagrams-cairo >= 0.6,
+--     containers >= 0.5,
+--     uniqueid >= 0.1,
+--     mtl >= 2.1,
+--     GLFW >= 0.5,
+--
+-- executable northu
+--   main-is:
+--     northu.hs
+--   build-depends:
+--     base >= 4.5,
+--     pango >= 0.12,
+--     cairo >= 0.12,
+--     OpenGL >= 2.8,
+--     bytestring >= 0.10,
+--     GLUT >= 2.4,
+--     array >= 0.4,
+--     monoid-extras >= 0.2,
+--     diagrams-lib >= 0.6,
+--     diagrams-cairo >= 0.6,
+--     containers >= 0.5,
+--     uniqueid >= 0.1,
+--     mtl >= 2.1,
+--     GLFW >= 0.5,
