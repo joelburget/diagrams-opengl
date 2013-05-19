@@ -33,7 +33,6 @@ type Interaction = Input -> Diagram OpenGL R2
 
 set2DViewport :: IORef SizeSpec2D -> GL.Size -> IO ()
 set2DViewport sizeSpec size@(GL.Size w h) = do
-  putStrLn "Setting 2d viewport"
   GL.viewport   $= (GL.Position 0 0, size)
   GL.matrixMode $= GL.Projection
   GL.loadIdentity

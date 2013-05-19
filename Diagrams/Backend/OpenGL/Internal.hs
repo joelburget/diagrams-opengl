@@ -14,7 +14,7 @@ import Data.Typeable
 import qualified Graphics.Rendering.Cairo as C
 import qualified Graphics.Rendering.Cairo.Matrix as CM
 import qualified Graphics.Rendering.OpenGL as GL
-import Diagrams.Prelude as P hiding (trace)
+import Diagrams.Prelude as P
 import Diagrams.TwoD.Adjust
 import Diagrams.TwoD.Text -- (Text)
 import Diagrams.TwoD.Path
@@ -24,9 +24,6 @@ import Diagrams.Backend.OpenGL.Texture
 import Diagrams.Backend.OpenGL.Models
 
 import Data.Monoid.Split
--- import Debug.Trace
-trace :: String -> a -> a
-trace = flip const
 
 data RetainedModel = RetainedModel
     { model    :: Model --GL.TextureObject
@@ -62,6 +59,7 @@ instance Backend OpenGL R2 where
         render
         cairoTransf t
         cairoStrokeStyle s
+        C.stroke
         C.restore
 
     -- doRender :: b -> Options b v -> Render b v -> Result b v
@@ -84,7 +82,7 @@ unO (O x) = x
 convert :: Options OpenGL R2 -> Diagram OpenGL R2 -> C.Render ()
 convert opts d = sequence_ renders where
     renders :: [C.Render ()]
-    renders = map (unO . renderOne) $ trace (show (length $ prims d')) (prims d')
+    renders = map (unO . renderOne) (prims d')
     d' :: Diagram OpenGL R2
     (opts', d') = adjustDia OpenGL opts d
     renderOne :: (Prim OpenGL R2, (Split (Transformation R2), Style R2)) ->
@@ -95,33 +93,26 @@ convert opts d = sequence_ renders where
         withStyle OpenGL s t1 (render OpenGL (transform (t1 <> t2) p))
 
 instance Renderable (Segment R2) OpenGL where
-  render _ (Linear v) = trace "render linear segment" $ O $ uncurry C.relLineTo (unr2 v)
+  render _ (Linear v) = O $ uncurry C.relLineTo (unr2 v)
   render _ (Cubic (unr2 -> (x1,y1))
                   (unr2 -> (x2,y2))
                   (unr2 -> (x3,y3)))
-    = trace "render cubic segment" $ O $ C.relCurveTo x1 y1 x2 y2 x3 y3
+    = O $ C.relCurveTo x1 y1 x2 y2 x3 y3
 
 instance Renderable (Trail R2) OpenGL where
   render _ (Trail segs c) = O $ do
-    trace "render trail: (" $ return ()
     mapM_ renderC segs
-    trace ")" $ return ()
     when c C.closePath
 
 instance Renderable (Path R2) OpenGL where
-  -- render _ (Path trs) = trace "render path" $ O $ lift C.newPath >> F.mapM_ renderTrail trs
-  render _ (Path trs) = O $ do
-    trace "render path: (" $ return ()
-    C.newPath
-    F.mapM_ renderTrail trs
-    trace ")" $ return ()
+  render _ (Path trs) = O $ C.newPath >> F.mapM_ renderTrail trs
     where renderTrail (unp2 -> p, tr) = do
-            uncurry C.moveTo p
-            renderC tr
+              uncurry C.moveTo p
+              renderC tr
 
 -- Use pango? Why did I not have this instance before?
 instance Renderable Text OpenGL where
-  render _ txt =  trace "render text" $ O $ renderC txt
+  render _ txt = O $ renderC txt
 
 renderC :: (Renderable a OpenGL, V a ~ R2) => a -> C.Render ()
 renderC a = case render OpenGL a of O r -> r
@@ -138,7 +129,8 @@ cairoMiscStyle s =
   where handle :: AttributeClass a => (a -> C.Render ()) -> Maybe (C.Render ())
         handle f = f `fmap` getAttr s
         clip     = mapM_ (\p -> renderC p >> C.clip) . getClip
-        fSize    = C.setFontSize . getFontSize
+        -- fSize    = C.setFontSize . getFontSize
+        fSize    = \x -> C.setFontSize $ getFontSize x
         fFace    = fromMaybe "" $ getFont <$> getAttr s
         fSlant   = fromFontSlant  . fromMaybe FontSlantNormal
                  $ getFontSlant  <$> getAttr s
@@ -146,7 +138,8 @@ cairoMiscStyle s =
                  $ getFontWeight <$> getAttr s
         handleFontFace = Just $ C.selectFontFace fFace fSlant fWeight
         fColor c = setSource (getFillColor c) s
-        lFillRule = C.setFillRule . fromFillRule . getFillRule
+        -- lFillRule = C.setFillRule . fromFillRule . getFillRule
+        lFillRule = \x -> C.setFillRule $ fromFillRule $ getFillRule x
 
 fromFontSlant :: FontSlant -> C.FontSlant
 fromFontSlant FontSlantNormal   = C.FontSlantNormal
@@ -178,9 +171,9 @@ cairoStrokeStyle s = sequence_ . catMaybes $
   ]
   where handle :: (AttributeClass a) => (a -> C.Render ()) -> Maybe (C.Render ())
         handle f = f `fmap` getAttr s
-        fColor c = trace ("fColor: " ++ show (colorToRGBA $ getFillColor c)) $ setSource (getFillColor c) s >> C.fillPreserve
-        lColor c = trace ("lColor: " ++ show (colorToRGBA $ getLineColor c)) $ setSource (getLineColor c) s
-        lWidth   = C.setLineWidth . (\x -> trace ("lWidth: " ++ show x) x) . getLineWidth
+        fColor c =  setSource (getFillColor c) s >> C.fillPreserve
+        lColor c = setSource (getLineColor c) s
+        lWidth   = C.setLineWidth . getLineWidth
         lCap     = C.setLineCap . fromLineCap . getLineCap
         lJoin    = C.setLineJoin . fromLineJoin . getLineJoin
         lDashing (getDashing -> Dashing ds offs) =
