@@ -97,7 +97,7 @@ interactiveMain interact = do
     GL.blend      $= GL.Enabled
     GL.blendFunc  $= (GL.SrcAlpha, GL.OneMinusSrcAlpha)
     -- set the color to clear background
-    GL.clearColor $= GL.Color4 0 0 0 0
+    GL.clearColor $= GL.Color4 0.22 0.21 0.26 0
 
     cairoTask interact
 

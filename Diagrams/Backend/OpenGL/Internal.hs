@@ -25,6 +25,7 @@ import Diagrams.Backend.OpenGL.Models
 
 import Data.Monoid.Split
 
+
 data RetainedModel = RetainedModel
     { model    :: Model --GL.TextureObject
     , modified :: Bool
@@ -105,27 +106,41 @@ instance Renderable (Trail R2) OpenGL where
     when c C.closePath
 
 instance Renderable (Path R2) OpenGL where
-  render _ (Path trs) = O $ C.newPath >> F.mapM_ renderTrail trs
-    where renderTrail (unp2 -> p, tr) = do
-              uncurry C.moveTo p
-              renderC tr
+  render _ (Path trs) = O $ C.newPath >> F.mapM_ renderTrail trs where
+      renderTrail (unp2 -> p, tr) = do
+          uncurry C.moveTo p
+          renderC tr
 
--- Use pango? Why did I not have this instance before?
+-- Use pango?
 instance Renderable Text OpenGL where
-  render _ txt = O $ renderC txt
+  render _ (Text tr al str) = O $ do
+    C.save
+    -- cairoTransf (tr <> reflectionY)
+    (refX, refY) <- case al of
+        BoxAlignedText xt yt -> do
+            tExt <- C.textExtents str
+            fExt <- C.fontExtents
+            let l = C.textExtentsXbearing tExt
+                r = C.textExtentsXadvance tExt
+                b = C.fontExtentsDescent  fExt
+                t = C.fontExtentsAscent   fExt
+            return (lerp l r xt, lerp (-b) t yt)
+        BaselineText -> return (0, 0)
+    -- cairoTransf (moveOriginBy (r2 (refX, -refY)) mempty)
+    C.showText str
+    C.restore
 
 renderC :: (Renderable a OpenGL, V a ~ R2) => a -> C.Render ()
 renderC a = case render OpenGL a of O r -> r
 
 cairoMiscStyle :: Style v -> C.Render ()
-cairoMiscStyle s =
-  sequence_
-  . catMaybes $ [ handle clip
-                , handle fSize
-                , handleFontFace
-                , handle fColor
-                , handle lFillRule
-                ]
+cairoMiscStyle s = sequence_ . catMaybes $
+    [ handle clip
+    , handle fSize
+    , handleFontFace
+    , handle fColor
+    , handle lFillRule
+    ]
   where handle :: AttributeClass a => (a -> C.Render ()) -> Maybe (C.Render ())
         handle f = f `fmap` getAttr s
         clip     = mapM_ (\p -> renderC p >> C.clip) . getClip

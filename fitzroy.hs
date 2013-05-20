@@ -1,6 +1,7 @@
 {-# LANGUAGE GADTs, RankNTypes, FlexibleContexts #-}
 import Control.Monad.Cont
 import Control.Monad.State
+import Data.Colour.SRGB
 import Diagrams.Prelude
 import Graphics.Rendering.Cairo hiding (identityMatrix, moveTo, translate)
 import qualified Graphics.Rendering.OpenGL as GL
@@ -13,20 +14,20 @@ import Diagrams.Backend.OpenGL.Models
 import Diagrams.Backend.OpenGL.CmdLine
 
 main :: IO ()
-main = interactiveMain boxes'
+main = interactiveMain $ const helloWorld
 
 weird :: Diagram OpenGL R2
 weird  = mconcat [
-    lw 10 $ fc yellow $ lc purple $ circle 200,
+    lw 10 $ fc (sRGB24read "#bbb") $ lc purple $ circle 200,
     fc purple $ lc yellow $ lw 5 $ square 400
     ]
 
 boxes' :: Interaction
 boxes' (Input x y t) = let mouseV = p2 (fromIntegral x, fromIntegral y) in
-    moveTo mouseV boxes <> centerXY weird
+    moveTo mouseV (boxes <> helloWorld)
 
 boxes :: Diagram OpenGL R2
-boxes = lw 10 $ lc yellow $ position [
+boxes = lw 10 $ lc (sRGB24read "#bbbbbb") $ position [
     (p2 (100, 100), square 100)
   , (p2 (200, 200), square 100)
   , (p2 (300, 300), square 100)
@@ -35,4 +36,4 @@ boxes = lw 10 $ lc yellow $ position [
   ]
 
 helloWorld :: Diagram OpenGL R2
-helloWorld = moveTo (p2 (200, 200)) $ text "Hello World!"
+helloWorld = lw 10 $ fc yellow $ text "Hello World!"

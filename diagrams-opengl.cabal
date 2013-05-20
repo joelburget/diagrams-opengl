@@ -53,7 +53,8 @@ executable fitzroy
     containers >= 0.5,
     uniqueid >= 0.1,
     mtl >= 2.1,
-    GLFW >= 0.5
+    GLFW >= 0.5,
+    colour >= 2.3
   ghc-options:
     -prof -fprof-auto -rtsopts
 
